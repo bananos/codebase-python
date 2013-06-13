@@ -42,14 +42,18 @@ class CodebaseClient(object):
     def tickets(self):
         return self._request_by_id('tickets.json', 'ticket', 'ticket_id')
 
+    def tickets_by_milestones(self, milestone):
+        return self._request_by_id('tickets.json', 'ticket', 'ticket_id', {
+            "query": 'milestone:"%s"' % milestone})
+
     def group_tickets_by_status(self, tickets, statuses=None):
         if statuses is None:
             statuses = self.statuses()
 
-        grouped_tickets = dict([(s['ticketing_status']['id'], []) for s in statuses.keys()])
+        grouped_tickets = dict([(statuses[s]['id'], []) for s in statuses.keys()])
 
-        for ticket in tickets:
-            status_id = ticket['ticket']['status_id']
+        for ticket in tickets.values():
+            status_id = ticket['status_id']
             if not status_id in grouped_tickets:
                 grouped_tickets[status_id] = []
             grouped_tickets[status_id].append(ticket)
