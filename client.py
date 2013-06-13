@@ -39,12 +39,25 @@ class CodebaseClient(object):
     def milestones(self):
         return self._request_by_id('milestones.json', 'ticketing_milestone')
 
-    def tickets(self):
-        return self._request_by_id('tickets.json', 'ticket', 'ticket_id')
+    def tickets(self, params={}):
+        key = 'ticket'
+        _id = 'ticket_id'
+        response = requests.get(
+            '%s/%s/tickets.json' % (self.BASE_URL, self.project),
+            params=params,
+            auth=self.auth).json()
+        result = dict([(x[key][_id], x[key]) for x in response])
+        if result:
+            _params = params.copy()
+            if "page" in _params:
+                _params["page"] += 1
+            else:
+                _params["page"] = 1
+            result.update(self.tickets(_params))
+        return result
 
     def tickets_by_milestones(self, milestone):
-        return self._request_by_id('tickets.json', 'ticket', 'ticket_id', {
-            "query": 'milestone:"%s"' % milestone})
+        return self.tickets({"query": 'milestone:"%s"' % milestone})
 
     def group_tickets_by_status(self, tickets, statuses=None):
         if statuses is None:
