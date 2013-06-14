@@ -15,17 +15,22 @@ class CodebaseClient(object):
         self.auth = (username, key)
         self.project = project
 
-    def activity(self):
+    def _plain_request(self, endpoint, params={}):
         return requests.get(
-            '%s/%s/activity.json' % (self.BASE_URL, self.project),
-            auth=self.auth).json()
+            '%s/%s/%s' % (self.BASE_URL, self.project, endpoint),
+            params=params,
+            auth=self.auth
+        ).json()
+
+    def _group_by_id(self, items, key, _id="id"):
+        return dict([(x[key][_id], x[key]) for x in items])
 
     def _request_by_id(self, url, key, _id='id', params={}):
-        response = requests.get(
-            '%s/%s/%s' % (self.BASE_URL, self.project, url),
-            params=params,
-            auth=self.auth).json()
-        return dict([(x[key][_id], x[key]) for x in response])
+        response = self._plain_request(url, params)
+        return self._group_by_id(response, key, _id)
+
+    def activity(self):
+        return self._plain_request('activity.json')
 
     def statuses(self):
         return self._request_by_id('tickets/statuses.json', 'ticketing_status')
@@ -40,19 +45,12 @@ class CodebaseClient(object):
         return self._request_by_id('milestones.json', 'ticketing_milestone')
 
     def tickets(self, params={}):
-        key = 'ticket'
-        _id = 'ticket_id'
-        response = requests.get(
-            '%s/%s/tickets.json' % (self.BASE_URL, self.project),
-            params=params,
-            auth=self.auth).json()
-        result = dict([(x[key][_id], x[key]) for x in response])
+        response = self._plain_request('tickets.json', params)
+        result = self._group_by_id(response, 'ticket', 'ticket_id')
         if result:
             _params = params.copy()
-            if "page" in _params:
-                _params["page"] += 1
-            else:
-                _params["page"] = 1
+            page = _params.get("page", 0)
+            _params["page"] = page + 1
             result.update(self.tickets(_params))
         return result
 
