@@ -1,10 +1,6 @@
 import requests
 
 
-API_USERNAME = ''
-API_KEY = ''
-
-
 class CodebaseClient(object):
 
     BASE_URL = 'https://api3.codebasehq.com'
@@ -26,41 +22,65 @@ class CodebaseClient(object):
         ).json()
 
     def _group_by_id(self, items, key, _id="id"):
-        return dict([(x[key][_id], x[key]) for x in items])
+        build = lambda item: (item[key][_id], item[key])
+        return dict(map(build, items))
 
-    def _request_by_id(self, endpoint, project, key, _id='id', params={}):
+    def _request_by_id(self, endpoint, key, _id='id', project=None, params={}):
         response = self._plain_request(endpoint, project, params)
         return self._group_by_id(response, key, _id)
 
-    def global_activity(self):
-        return self._plain_request(endpoint='activity.json')
-
-    def activity(self, project):
-        return self._plain_request(endpoint='activity.json', project=project)
-
-    def statuses(self, project):
+    def global_activity(self, page=1):
         return self._request_by_id(
-            endpoint='tickets/statuses.json',
-            project=project,
-            key='ticketing_status')
+            endpoint="activity.json",
+            key="event",
+            params={"page": page}
+        )
 
-    def priorities(self, project):
+    def activity(self, project, page=1):
         return self._request_by_id(
-            endpoint='tickets/priorities.json',
+            endpoint='activity.json',
             project=project,
-            key='ticketing_priority')
+            key="event",
+            params={"page": page}
+        )
 
-    def categories(self, project):
+    def all_projects(self):
         return self._request_by_id(
-            endpoint='tickets/categories.json',
-            project=project,
-            key='ticketing_category')
+            endpoint='projects.json',
+            key='project',
+            _id='permalink'
+        )
 
-    def milestones(self, project):
+    def project(self, project):
+        return self._plain_request(endpoint='%s.json' % project)['project']
+
+    def project_groups(self):
         return self._request_by_id(
-            endpoint='milestones.json',
+            endpoint='project_groups.json',
+            key='project_group'
+        )
+
+    def assignments(self, project):
+        return self._request_by_id(
+            endpoint='assignments.json',
             project=project,
-            key='ticketing_milestone')
+            key='user',
+            _id='username'
+        )
+
+    def repositories(self, project):
+        return self._request_by_id(
+            endpoint='repositories.json',
+            project=project,
+            key='repository',
+            _id='permalink'
+        )
+
+    def repository(self, project, repository):
+        return self._plain_request(
+            endpoint='%s.json' % repository,
+            project=project
+        )['repository']
 
     def tickets(self, project, params={}):
         """
@@ -89,25 +109,26 @@ class CodebaseClient(object):
             params={"query": 'milestone:"%s"' % milestone}
         )
 
-    def group_tickets_by_status(self, tickets, project, statuses=None):
-        if statuses is None:
-            statuses = self.statuses(project)
+    def statuses(self, project):
+        return self._request_by_id(
+            endpoint='tickets/statuses.json',
+            project=project,
+            key='ticketing_status')
 
-        grouped_tickets = dict([(statuses[s]['id'], []) for s in statuses.keys()])
+    def priorities(self, project):
+        return self._request_by_id(
+            endpoint='tickets/priorities.json',
+            project=project,
+            key='ticketing_priority')
 
-        for ticket in tickets.values():
-            status_id = ticket['status_id']
-            if not status_id in grouped_tickets:
-                grouped_tickets[status_id] = []
-            grouped_tickets[status_id].append(ticket)
+    def categories(self, project):
+        return self._request_by_id(
+            endpoint='tickets/categories.json',
+            project=project,
+            key='ticketing_category')
 
-        return grouped_tickets
-
-
-def main():
-    client = CodebaseClient(API_USERNAME, API_KEY)
-    return
-
-
-if __name__ == '__main__':
-    main()
+    def milestones(self, project):
+        return self._request_by_id(
+            endpoint='milestones.json',
+            project=project,
+            key='ticketing_milestone')
