@@ -86,6 +86,14 @@ class CodebaseClient(object):
             _id='permalink'
         )
 
+    def active_projects(self):
+        result = {}
+        for key, value in self.all_projects().items():
+            if value["status"] == "active":
+                result[key] = value
+
+        return result
+
     def project(self, project):
         """
         Request to '/<project>.json'. Returns all information for
@@ -206,3 +214,11 @@ class CodebaseClient(object):
             endpoint='milestones',
             project=project,
             key='ticketing_milestone')
+
+    def active_milestones(self, project):
+        result = {}
+        for key, value in self.milestones(project).items():
+            if value["status"] == "active":
+                result[key] = value
+
+        return result

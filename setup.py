@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="codebase-api",
-    version="0.1.0",
+    version="0.1.1",
     author="Pablo Recio",
     author_email="pablo@recio.me",
     description="Wrapper library for connecting with CasebaseHQ API",
