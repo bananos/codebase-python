@@ -6,7 +6,7 @@ setup(
     version="0.1.1",
     author="Pablo Recio",
     author_email="pablo@recio.me",
-    description="Wrapper library for connecting with CasebaseHQ API",
+    description="Wrapper library for connecting with CodebaseHQ API",
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
