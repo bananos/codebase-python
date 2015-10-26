@@ -1,6 +1,7 @@
-# Codebase Python API
+Codebase Python API
+=======================
 
-This project is just a wrapper for [http://support.codebasehq.com/kb][CodebaseHQ API].
+This project is just a wrapper for [CodebaseHQ API](http://support.codebasehq.com/kb).
 Some notes:
 
 * The project is just an alpha version.
@@ -20,12 +21,18 @@ or directly from the current master branch from GitHub::
 
 The library is really easy to use::
 
+```python
+
     from codebase import CodebaseClient
     client = CodebaseClient(API_USERNAME, API_KEY)  # from your Codebase account page
 
     projects = client.all_projects()
     milestones = client.milestones('my-project')
-    tickets = clients.tickets('my-project', {'query': 'milestone:"Sprint 1"')
+    users = client.users()
+    tickets = client.tickets('my-project', {'query': 'milestone:"Sprint 1"')
+    notes = client.notes('my-project', 204)
+
+```
 
 Supported operations:
 
