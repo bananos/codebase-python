@@ -2,7 +2,6 @@ import requests
 
 
 class CodebaseClient(object):
-
     BASE_URL = 'https://api3.codebasehq.com'
 
     def __init__(self, username, key):
@@ -222,3 +221,27 @@ class CodebaseClient(object):
                 result[key] = value
 
         return result
+
+    def notes(self, project, ticket_id, params={}):
+        """
+        Request to '/<project>/tickets/<id>/notes.json'. Returns notes for the given ticket
+        paginated by 20.
+        """
+        return self._request_by_id(
+            endpoint='tickets/%i/notes' % ticket_id,
+            project=project,
+            params=params,
+            key='ticket_note',
+            _id='id'
+        )
+
+    def users(self, params={}):
+        """
+        Request to '/users.json'. Returns users.
+        """
+        return self._request_by_id(
+            endpoint='users',
+            params=params,
+            key='user',
+            _id='id'
+        )
